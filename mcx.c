@@ -12,7 +12,7 @@ setDefineDefaultName(char, string);
 setDefineVaListInt(char);
 
 void init(MCX) {
-    illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 32));
+    illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
 }
 
 string substring(string str, u index) {
