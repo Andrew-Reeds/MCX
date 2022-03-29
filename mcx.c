@@ -9,6 +9,7 @@ listDefineDefaultName(char, string);
 listDefineVaListIntName(char, string);
 
 setDefineDefaultName(char, string);
+setDefineVaListInt(char);
 
 void init(MCX) {
     illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 32));

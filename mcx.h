@@ -481,6 +481,7 @@ listDeclareVaListName(char, string);
 typedef string charList;
 
 setDeclareDefaultName(char, string);
+setDeclareVaList(char);
 
 void init(MCX);
 
