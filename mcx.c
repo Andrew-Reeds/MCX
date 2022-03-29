@@ -1,10 +1,18 @@
 #include "mcx.h"
 #include <unistd.h>
+#include <linux/limits.h>
 
 listDefineDefault(u);
 listDefineVaListInt(u);
+
 listDefineDefaultName(char, string);
 listDefineVaListIntName(char, string);
+
+setDefineDefaultName(char, string);
+
+void init(MCX) {
+    illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 32));
+}
 
 string substring(string str, u index) {
     return stringGetRange(str, index, str.len - index);
@@ -102,8 +110,8 @@ char* ctcptr(char c) {
     return res;
 }
 
-string readAllText(string file) {
-    FILE* fp = fopen(cptrify(file), "r");
+string readAllText(string path) {
+    FILE* fp = fopen(cptrify(path), "r");
     fseek(fp, 0l, SEEK_END);
     long size = ftell(fp);
     fseek(fp, 0l, SEEK_SET);
@@ -111,14 +119,22 @@ string readAllText(string file) {
     fread(res, 1, size, fp);
     return stringify(res);
 }
-void writeAllText(string file, string text) {
-    FILE* f = fopen(cptrify(file), "w");
+void writeAllText(string path, string text) {
+    FILE* f = fopen(cptrify(path), "w");
     fputs(cptrify(text), f);
     fclose(f);
 }
-bool fileExists(string file) {
-    return access(cptrify(file), F_OK) == 0;
+bool fileExists(string path) {
+    return access(cptrify(path), F_OK) == 0;
 }
 string absolutePath(string path) {
     return stringify(realpath(cptrify(path), NULL));
+}
+
+set(char)* illegalPath = NULL;
+bool isPathLegal(string path) {
+    bool res = path.len <= PATH_MAX;
+    for (u i = 0; i < path.len && res; i++)
+        res = !charSetContains(illegalPath, path.items[i]);
+    return res;
 }
