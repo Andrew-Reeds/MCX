@@ -452,6 +452,7 @@ SCSCRS,
         as(range(type), res)->min = min;                                \
         as(range(type), res)->max = max;                                \
         as(range(type), res)->inclMin = true;                           \
+        as(range(type), res)->inclMax = true;                           \
         return res;                                                     \
     }
 #define setDefineDefaultName(type, listName)        \
