@@ -483,6 +483,7 @@ typedef string charList;
 
 setDeclareDefaultName(char, string);
 setDeclareVaList(char);
+listDeclareEquals(string);
 
 void init(MCX);
 

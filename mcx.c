@@ -7,6 +7,7 @@ listDefineVaListInt(u);
 
 listDefineDefaultName(char, string);
 listDefineVaListIntName(char, string);
+listDefineEquals(string);
 
 setDefineDefaultName(char, string);
 setDefineVaListInt(char);
