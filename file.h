@@ -6,12 +6,23 @@
 void init(FILE);
 
 static inline string readAllText(string path) {
-    FILE* fp = fopen(cptr(path), "r");
-    fseek(fp, 0l, SEEK_END);
-    long size = ftell(fp);
-    fseek(fp, 0l, SEEK_SET);
+    FILE* f = fopen(cptr(path), "r");
+    fseek(f, 0l, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0l, SEEK_SET);
     char* res = malloc(size);
-    fread(res, 1, size, fp);
+    fread(res, 1, size, f);
+    fclose(f);
+    return str(res);
+}
+static inline string runProcess(string command) {
+    FILE* f = popen("objdump -d tmp.o", "r");
+    fseek(f, 0l, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0l, SEEK_SET);
+    char* res = malloc(size);
+    fread(res, 1, size, f);
+    pclose(f);
     return str(res);
 }
 static inline void writeAllText(string path, string text) {
