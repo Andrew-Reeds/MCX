@@ -24,10 +24,17 @@ static inline char* cptr(string str) {
     res[str.len] = 0;
     return res;
 }
-static inline string str(char* str) {
+static inline string sstr(char* str) {
     string res = { strlen(str), 0, str };
     res.cap = res.len;
     return res;
+}
+static inline string str(char* str) {
+    if (str == NULL) {
+        string res = {0};
+        return res;
+    } else
+        return stringFromArray(str, strlen(str));
 }
 
 static inline string utos(u64 u) {
