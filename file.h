@@ -8,8 +8,8 @@ void init(FILE);
 static inline string readToEnd(FILE* f) {
     long pos = ftell(f);
     fseek(f, 0l, SEEK_END);
-    long size = ftell(f);
-    fseek(f, 0l, SEEK_SET);
+    long size = ftell(f) - pos;
+    fseek(f, pos, SEEK_SET);
     char* res = malloc(size);
     fread(res, 1, size, f);
     return str(res);
