@@ -11,13 +11,6 @@ setDeclareDefaultName(char, string);
 setDeclareVaList(char);
 listDeclareEquals(string);
 
-static inline string substring(string str, u index) {
-    return stringGetRange(str, index, str.len - index);
-}
-static inline void concat(string* str, string other) {
-    return stringAddRange(str, other);
-}
-
 static inline char* cptr(string str) {
     char* res = (char*)malloc((str.len + 1) * sizeof(char));
     memcpy(res, str.items, str.len);
@@ -35,6 +28,16 @@ static inline string str(char* str) {
         return res;
     } else
         return stringFromArray(str, strlen(str));
+}
+
+static inline string substring(string str, u index) {
+    return stringGetRange(str, index, str.len - index);
+}
+static inline void concat(string* str, string other) {
+    return stringAddRange(str, other);
+}
+static inline void catCptr(string* str, char* other) {
+    return concat(str, sstr(other));
 }
 
 static inline string utos(u64 u) {
