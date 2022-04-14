@@ -33,9 +33,6 @@ typedef enum {
     bool type##AggregateContains(set(type)* set, type item);            \
     bool type##ComplementSetContains(set(type)* set, type item);        \
     bool type##CombinedSetContains(set(type)* set, type item);          \
-    aggregate(type) type##AggregateDefault();                           \
-    type##ComplementSet type##ComplementSetDefault();                   \
-    type##CombinedSet type##CombinedSetDefault();                       \
     set(type)* type##AggregateNew(listName list);                       \
     set(type)* type##AggregateFromArray(type* items, u count);          \
     set(type)* type##ComplementSetNew(set(type)* set);                  \
@@ -57,7 +54,6 @@ typedef enum {
         type max;                                           \
     } range(type);                                          \
     bool type##RangeContains(set(type)* set, type item);    \
-    range(type) type##RangeDefault();                       \
     type##Set* type##RangeNew(type min, type max)
 #define setDeclareDefaultName(type, listName)       \
     setDeclareCompareName(type, listName);          \
@@ -81,31 +77,24 @@ typedef enum {
             (as(type##CombinedSet, set)->scs == SCSSUB && (left && !right)) || \
             (as(type##CombinedSet, set)->scs == SCSCRS && (left && right)); \
     }                                                                   \
-    type##ComplementSet type##ComplementSetDefault() {                  \
-        type##ComplementSet res = { &type##ComplementSetContains, NULL }; \
-        return res;                                                     \
-    }                                                                   \
-    type##CombinedSet type##CombinedSetDefault() {                      \
-        type##CombinedSet res = { &type##CombinedSetContains, NULL, NULL, SCSADD }; \
-        return res;                                                     \
-    }                                                                   \
     type##Set* type##AggregateNew(listName items) {                     \
         set(type)* res = as(set(type), new(aggregate(type)));           \
         as(aggregate(type), res)->items = items;                        \
+        res->contains = &type##AggregateContains;                       \
         return res;                                                     \
     }                                                                   \
     type##Set* type##ComplementSetNew(set(type)* set) {                 \
         set(type)* res = as(set(type), new(type##ComplementSet));       \
-        *as(type##ComplementSet, res) = type##ComplementSetDefault();   \
         as(type##ComplementSet, res)->orgnl = set;                      \
+        res->contains = &type##ComplementSetContains;                   \
         return res;                                                     \
     }                                                                   \
     type##Set* type##CombinedSetNew(set(type)* left, set(type)* right, SETCOMBINATIONSTYLE style) { \
         set(type)* res = as(set(type), new(type##CombinedSet));         \
-        *as(type##CombinedSet, res) = type##CombinedSetDefault();       \
         as(type##CombinedSet, res)->left = left;                        \
         as(type##CombinedSet, res)->right = right;                      \
         as(type##CombinedSet, res)->scs = style;                        \
+        res->contains = &type##CombinedSetContains;                     \
         return res;                                                     \
     }                                                                   \
     set(type)* type##AggregateFromArray(type* items, u count) {         \
@@ -158,20 +147,13 @@ typedef enum {
         return (type##LessThan(as(range(type), set)->min, item) || as(range(type), set)->inclMin && as(range(type), set)->min == item) && \
             (type##GreaterThan(as(range(type), set)->max, item) || as(range(type), set)->inclMax && as(range(type), set)->max == item); \
     }                                                                   \
-    range(type) type##RangeDefault() {                                  \
-        range(type) res = { 0 };                                        \
-        res.contains = &type##RangeContains;                            \
-        res.inclMin = true;                                             \
-        res.inclMax = true;                                             \
-        return res;                                                     \
-    }                                                                   \
     type##Set* type##RangeNew(type min, type max) {                     \
         set(type)* res = as(set(type), new(range(type)));               \
-        *as(range(type), res) = type##RangeDefault();                   \
         as(range(type), res)->min = min;                                \
         as(range(type), res)->max = max;                                \
         as(range(type), res)->inclMin = true;                           \
         as(range(type), res)->inclMax = true;                           \
+        res->contains = &type##RangeContains;                           \
         return res;                                                     \
     }
 #define setDefineDefaultName(type, listName)        \
