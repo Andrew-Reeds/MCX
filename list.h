@@ -62,8 +62,8 @@
 
 #define listDefineName(type, name)                                      \
     name name##FromArray(type* items, u count) {                        \
-        name res = {0};                                                 \
-        if (count == 0)                                                 \
+        name res = { count, 0, NULL };                                  \
+        if (res.len == 0)                                               \
             return res;                                                 \
         res.cap = 16;                                                   \
         while (res.len > res.cap)                                       \
