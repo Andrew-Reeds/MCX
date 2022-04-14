@@ -1,6 +1,6 @@
 #ifndef MCX_STRING_H
 #define MCX_STRING_H
-
+#include <stdio.h>
 #include "list.h"
 #include "set.h"
 
