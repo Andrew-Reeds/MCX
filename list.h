@@ -1,6 +1,7 @@
-#ifndef LIST_H
-#define LIST_H
-
+#ifndef MCX_LIST_H
+#define MCX_LIST_H
+#include <stdbool.h>
+#include <stdarg.h>
 #include "mcx.h"
 
 #define list(type) type##List
@@ -14,13 +15,13 @@
         return new(name);                                       \
     }                                                           \
     name name##FromArray(type* items, u count);                 \
-    static inline name name##Clone(name original) {                     \
-        if (original.cap == 0)                                          \
-            return original;                                            \
+    static inline name name##Clone(name original) {             \
+        if (original.cap == 0)                                  \
+            return original;                                    \
         name res = { original.len, original.cap, (type*)malloc(original.cap * sizeof(type)) }; \
-        memcpy(res.items, original.items, original.len);                \
-        return res;                                                     \
-    }                                                                   \
+        memcpy(res.items, original.items, original.len);        \
+        return res;                                             \
+    }                                                           \
     void name##Add(name* list, type item);                      \
     void name##AddRange(name* list, name other);                \
     name name##With(name list, type item);                      \
@@ -260,4 +261,4 @@
 listDeclareDefault(u);
 listDeclareVaList(u);
 
-#endif // LIST_H
+#endif // MCX_LIST_H

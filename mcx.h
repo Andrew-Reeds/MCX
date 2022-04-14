@@ -2,13 +2,7 @@
 #define MCX_H
 #include <memory.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <linux/limits.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;

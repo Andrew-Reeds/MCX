@@ -1,6 +1,7 @@
-#ifndef FILE_H
-#define FILE_H
-
+#ifndef MCX_FILE_H
+#define MCX_FILE_H
+#include <stdio.h>
+#include <unistd.h>
 #include "string.h"
 
 void init(FILE);
@@ -41,4 +42,4 @@ static inline string realPath(string path) {
 extern set(char)* illegalPath;
 bool isPathLegal(string path);
 
-#endif // FILE_H
+#endif // MCX_FILE_H

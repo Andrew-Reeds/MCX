@@ -1,5 +1,5 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef MCX_STRING_H
+#define MCX_STRING_H
 
 #include "list.h"
 #include "set.h"
@@ -59,4 +59,4 @@ static inline char* ctcptr(char c) {
 
 char getEscChar(char c);
 
-#endif // STRING_H
+#endif // MCX_STRING_H

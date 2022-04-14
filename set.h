@@ -1,6 +1,5 @@
-#ifndef SET_H
-#define SET_H
-
+#ifndef MCX_SET_H
+#define MCX_SET_H
 #include "list.h"
 
 typedef enum {
@@ -188,4 +187,4 @@ typedef enum {
 #define setDefineCompare(type) setDefineCompareName(type, type##List)
 #define setDefineDefault(type) setDefineDefaultName(type, type##List)
 
-#endif // SET_H
+#endif // MCX_SET_H
