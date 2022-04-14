@@ -1,7 +1,6 @@
 #ifndef MCX_FILE_H
 #define MCX_FILE_H
 #include <stdio.h>
-#include <unistd.h>
 #include "string.h"
 
 void init(FILE);
@@ -32,13 +31,11 @@ static inline void writeAllText(string path, string text) {
     fputs(cptr(text), f);
     fclose(f);
 }
-static inline bool fileExists(string path) {
-    return access(cptr(path), F_OK) == 0;
-}
+
 static inline string realPath(string path) {
     return str(realpath(cptr(path), NULL));
 }
-
+bool fileExists(string path);
 extern set(char)* illegalPath;
 bool isPathLegal(string path);
 

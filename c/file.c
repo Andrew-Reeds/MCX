@@ -1,4 +1,5 @@
 #include "../file.h"
+#include <unistd.h>
 
 void init(FILE) {
     illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
@@ -10,4 +11,7 @@ bool isPathLegal(string path) {
     for (u i = 0; i < path.len && res; i++)
         res = !charSetContains(illegalPath, path.items[i]);
     return res;
+}
+bool fileExists(string path) {
+    return access(cptr(path), F_OK) == 0;
 }
