@@ -214,7 +214,7 @@
             if (c != 0)                                                 \
                 return c;                                               \
         }                                                               \
-        return (i > other.len) - (i < other.len);                       \
+        return (count > other.len) - (count < other.len);               \
     }                                                                   \
     void name##RemoveAll(name* list, type item) {                       \
         for (u i = list->len; i > 0; i--)                               \
