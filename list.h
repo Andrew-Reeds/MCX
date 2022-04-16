@@ -40,6 +40,9 @@
     static inline int name##Compare(name list, name other) {            \
         return name##RangeCompare(list, 0, list.len, other);            \
     }                                                                   \
+    static inline bool name##Equals(name list, name other) {            \
+        return list.len == other.len && name##Compare(list, other) == 0; \
+    }                                                                   \
     static inline bool name##StartsWith(name list, name other) {        \
         return other.len <= list.len && name##RangeCompare(list, 0, other.len, other) == 0; \
     }                                                                   \
