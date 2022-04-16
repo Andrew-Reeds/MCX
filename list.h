@@ -33,32 +33,32 @@
     name name##GetRange(name list, u index, u count);
 #define listDeclareVaListName(type, name)       \
     name name##FromVaList(u count, ...);
-#define listDeclareEqualsName(type, name)                               \
+#define listDeclareCompareName(type, name)                              \
     listDeclareName(type, name);                                        \
     bool name##Contains(name list, type item);                          \
-    bool name##RangeEquals(name list, name other, u index);             \
-    static inline bool name##Equals(name list, name other) {            \
-        return list.len == other.len && name##RangeEquals(list, other, 0); \
+    int name##RangeCompare(name list, u offset, u count, name other);   \
+    static inline bool name##Compare(name list, name other) {           \
+        return name##RangeCompare(list, 0, list.len, other);            \
     }                                                                   \
     static inline bool name##StartsWith(name list, name other) {        \
-        return other.len <= list.len && name##RangeEquals(list, other, 0); \
+        return other.len <= list.len && name##RangeCompare(list, 0, other.len, other) == 0; \
     }                                                                   \
     static inline bool name##EndsWith(name list, name other) {          \
-        return (other.len <= list.len) && name##RangeEquals(list, other, list.len - other.len); \
+        return other.len <= list.len && name##RangeCompare(list, list.len - other.len, other.len, other) == 0; \
     }                                                                   \
     void name##RemoveAll(name* list, type item);                        \
     void name##ReplaceAll(name* list, name original, name replacement); \
     u name##Pos(name list, type item);                                  \
     u name##LastPos(name list, type item);
-#define listDeclareDefaultName(type, name)                      \
-    listDeclareEqualsName(type, name);                          \
-    static inline bool type##Equals(type left, type right) {    \
-        return left == right;                                   \
+#define listDeclareDefaultName(type, name)                       \
+    listDeclareCompareName(type, name);                          \
+    static inline bool type##Compare(type left, type right) {    \
+        return (left > right) - (left < right);                  \
     }
 #define listDeclare(type) listDeclareName(type, type##List)
 #define listDeclareVaList(type) listDeclareVaListName(type, type##List)
 #define listDeclareDefault(type) listDeclareDefaultName(type, type##List)
-#define listDeclareEquals(type) listDeclareEqualsName(type, type##List)
+#define listDeclareCompare(type) listDeclareCompareName(type, type##List)
 
 #define listDefineName(type, name)                                      \
     name name##FromArray(type* items, u count) {                        \
@@ -197,27 +197,28 @@
         va_end(args);                                       \
         return res;                                         \
     }
-#define listDefineEqualsName(type, name)                                \
-    listDefineName(type, name)                                          \
-        bool name##Contains(name list, type item) {                     \
+#define listDefineCompareName(type, name)                               \
+    listDefineName(type, name);                                         \
+    bool name##Contains(name list, type item) {                         \
         for (u i = 0; i < list.len; i++)                                \
-            if (type##Equals(list.items[i], item))                      \
+            if (type##Compare(list.items[i], item) == 0)                \
                 return true;                                            \
         return false;                                                   \
     }                                                                   \
-    bool name##RangeEquals(name list, name other, u index) {            \
-        if (other.len + index > list.len)                               \
-            return false;                                               \
-        if (list.len == 0 && other.len == 0)                            \
-            return true;                                                \
-        for (u i = 0; i < other.len; i++)                               \
-            if (!type##Equals(list.items[i + index], other.items[i]))   \
-                return false;                                           \
-        return true;                                                    \
+    int name##RangeCompare(name list, u offset, u count, name other) {  \
+        if (count + offset > list.len)                                  \
+            count = list.len - offset;                                  \
+        u i = 0;                                                        \
+        for ( ; i < count && i < other.len && i + offset < list.len; i++) { \
+            int c = type##Compare(list.items[i + offset], other.items[i]); \
+            if (c != 0)                                                 \
+                return c;                                               \
+        }                                                               \
+        return (i > other.len) - (i < other.len);                       \
     }                                                                   \
     void name##RemoveAll(name* list, type item) {                       \
         for (u i = list->len; i > 0; i--)                               \
-            if (type##Equals(list->items[i - 1], item))                 \
+            if (type##Compare(list->items[i - 1], item) == 0)           \
                 name##Remove(list, i - 1);                              \
     }                                                                   \
     void name##ReplaceAll(name* list, name original, name replacement) { \
@@ -225,7 +226,7 @@
             return;                                                     \
         uList indexes = {0};                                            \
         for (u i = 0; i <= list->len - original.len; i++)               \
-            if (name##RangeEquals(*list, original, i)) {                \
+            if (name##RangeCompare(*list, i, original.len, original) == 0) { \
                 uListAdd(&indexes, i);                                  \
                 i += original.len - 1;                                  \
             }                                                           \
@@ -236,21 +237,21 @@
     }                                                                   \
     u name##Pos(name list, type item) {                                 \
         u i = 0;                                                        \
-        for (; i < list.len && !type##Equals(list.items[i], item); i++); \
+        for (; i < list.len && type##Compare(list.items[i], item) != 0; i++); \
         return i;                                                       \
     }                                                                   \
     u name##LastPos(name list, type item) {                             \
         u i = list.len;                                                 \
-        for (; i > 0 && !type##Equals(list.items[i - 1], item); i--);   \
+        for (; i > 0 && type##Compare(list.items[i - 1], item) != 0; i--); \
         if (i == 0)                                                     \
             return list.len;                                            \
         return i - 1;                                                   \
     }
-#define listDefineDefaultName(type, name) listDefineEqualsName(type, name)
+#define listDefineDefaultName(type, name) listDefineCompareName(type, name)
 #define listDefine(type) listDefineName(type, type##List)
 #define listDefineVaList(type) listDefineVaListName(type, type##List)
 #define listDefineVaListInt(type) listDefineVaListIntName(type, type##List)
-#define listDefineEquals(type) listDefineEqualsName(type, type##List)
+#define listDefineCompare(type) listDefineCompareName(type, type##List)
 #define listDefineDefault(type) listDefineDefaultName(type, type##List)
 #define listReset(list, type) {                   \
         (list).len = 0;                           \

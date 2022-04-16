@@ -30,13 +30,22 @@ typedef enum {
         type##Set* right;                                               \
         SETCOMBINATIONSTYLE scs;                                        \
     } type##CombinedSet;                                                \
+    typedef struct {                                                    \
+        bool (*contains)(set(type)* set, type item);                    \
+        bool inclMin;                                                   \
+        bool inclMax;                                                   \
+        type min;                                                       \
+        type max;                                                       \
+    } range(type);                                                      \
     bool type##AggregateContains(set(type)* set, type item);            \
     bool type##ComplementSetContains(set(type)* set, type item);        \
     bool type##CombinedSetContains(set(type)* set, type item);          \
+    bool type##RangeContains(set(type)* set, type item);                \
     set(type)* type##AggregateNew(listName list);                       \
     set(type)* type##AggregateFromArray(type* items, u count);          \
     set(type)* type##ComplementSetNew(set(type)* set);                  \
     set(type)* type##CombinedSetNew(set(type)* left, set(type)* right, SETCOMBINATIONSTYLE style); \
+    type##Set* type##RangeNew(type min, type max);                      \
     set(type)* type##SetAdd(set(type)* left, set(type)* right);         \
     set(type)* type##SetSubstract(set(type)* left, set(type)* right);   \
     set(type)* type##Cross(set(type)* left, set(type)* right);          \
@@ -44,21 +53,6 @@ typedef enum {
     bool type##SetContains(set(type)* set, type item)
 #define setDeclareVaList(type)                          \
     set(type)* type##AggregateFromVaList(u count, ...);
-#define setDeclareCompareName(type, listName)               \
-    setDeclareName(type, listName);                         \
-    typedef struct {                                        \
-        bool (*contains)(set(type)* set, type item);        \
-        bool inclMin;                                       \
-        bool inclMax;                                       \
-        type min;                                           \
-        type max;                                           \
-    } range(type);                                          \
-    bool type##RangeContains(set(type)* set, type item);    \
-    type##Set* type##RangeNew(type min, type max)
-#define setDeclareDefaultName(type, listName)       \
-    setDeclareCompareName(type, listName);          \
-    bool type##LessThan(type left, type right);     \
-    bool type##GreaterThan(type left, type right)
 #define setDeclare(type) setDeclareName(type, type##List);
 #define setDeclareCompare(type) setDeclareCompareName(type, type##List)
 #define setDeclareDefault(type) setDeclareDefaultName(type, type##List)
@@ -114,6 +108,19 @@ typedef enum {
     }                                                                   \
     bool type##SetContains(set(type)* set, type item) {                 \
         return (*set->contains)(set, item);                             \
+    }                                                                   \
+    bool type##RangeContains(set(type)* set, type item) {               \
+        return (type##Compare(as(range(type), set)->min, item) < 0 || as(range(type), set)->inclMin && as(range(type), set)->min == item) && \
+            (type##Compare(as(range(type), set)->max, item) > 0 || as(range(type), set)->inclMax && as(range(type), set)->max == item); \
+    }                                                                   \
+    type##Set* type##RangeNew(type min, type max) {                     \
+        set(type)* res = as(set(type), new(range(type)));               \
+        as(range(type), res)->min = min;                                \
+        as(range(type), res)->max = max;                                \
+        as(range(type), res)->inclMin = true;                           \
+        as(range(type), res)->inclMax = true;                           \
+        res->contains = &type##RangeContains;                           \
+        return res;                                                     \
     }
 #define setDefineVaList(type)                               \
     set(type)* type##AggregateFromVaList(u count, ...) {    \
@@ -140,29 +147,6 @@ typedef enum {
             res.items[i] = (type)va_arg(args, u);           \
         va_end(args);                                       \
         return type##AggregateNew(res);                     \
-    }
-#define setDefineCompareName(type, listName)                            \
-    setDefineName(type, listName);                                      \
-    bool type##RangeContains(set(type)* set, type item) {               \
-        return (type##LessThan(as(range(type), set)->min, item) || as(range(type), set)->inclMin && as(range(type), set)->min == item) && \
-            (type##GreaterThan(as(range(type), set)->max, item) || as(range(type), set)->inclMax && as(range(type), set)->max == item); \
-    }                                                                   \
-    type##Set* type##RangeNew(type min, type max) {                     \
-        set(type)* res = as(set(type), new(range(type)));               \
-        as(range(type), res)->min = min;                                \
-        as(range(type), res)->max = max;                                \
-        as(range(type), res)->inclMin = true;                           \
-        as(range(type), res)->inclMax = true;                           \
-        res->contains = &type##RangeContains;                           \
-        return res;                                                     \
-    }
-#define setDefineDefaultName(type, listName)        \
-    setDefineCompareName(type, listName);           \
-    bool type##LessThan(type left, type right) {    \
-        return left < right;                        \
-    }                                               \
-    bool type##GreaterThan(type left, type right) { \
-        return left > right;                        \
     }
 #define setDefine(type) setDefineName(type, type##List)
 #define setDefineVaListInt(type) setDefineVaListIntName(type, type##List)

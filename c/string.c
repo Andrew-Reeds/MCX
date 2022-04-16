@@ -2,9 +2,9 @@
 
 listDefineDefaultName(char, string);
 listDefineVaListIntName(char, string);
-listDefineEquals(string);
+listDefineCompare(string);
 
-setDefineDefaultName(char, string);
+setDefineName(char, string);
 setDefineVaListIntName(char, string);
 
 char getEscChar(char c) {

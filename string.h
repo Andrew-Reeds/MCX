@@ -7,9 +7,9 @@
 listDeclareDefaultName(char, string);
 listDeclareVaListName(char, string);
 
-setDeclareDefaultName(char, string);
+setDeclareName(char, string);
 setDeclareVaList(char);
-listDeclareEquals(string);
+listDeclareCompare(string);
 
 static inline char* cptr(string str) {
     char* res = (char*)malloc((str.len + 1) * sizeof(char));
