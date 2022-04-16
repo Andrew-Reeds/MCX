@@ -44,6 +44,7 @@ typedef enum {
     set(type)* type##AggregateNew(listName list);                       \
     set(type)* type##AggregateFromArray(type* items, u count);          \
     set(type)* type##ComplementSetNew(set(type)* set);                  \
+    set(type)* type##CombinedSetNew(set(type)* left, set(type)* right, SETCOMBINATIONSTYLE style); \
     inline static set(type)* type##SetAdd(set(type)* left, set(type)* right) { \
         return type##CombinedSetNew(left, right, SCSADD);               \
     }                                                                   \
@@ -53,7 +54,6 @@ typedef enum {
     inline static set(type)* type##Cross(set(type)* left, set(type)* right) { \
         return type##CombinedSetNew(left, right, SCSCRS);               \
     }                                                                   \
-    set(type)* type##CombinedSetNew(set(type)* left, set(type)* right, SETCOMBINATIONSTYLE style); \
     type##Set* type##RangeNew(type min, type max);                      \
     set(type)* type##SetAdd(set(type)* left, set(type)* right);         \
     set(type)* type##SetSubstract(set(type)* left, set(type)* right);   \
