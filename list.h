@@ -37,7 +37,7 @@
     listDeclareName(type, name);                                        \
     bool name##Contains(name list, type item);                          \
     int name##RangeCompare(name list, u offset, u count, name other);   \
-    static inline bool name##Compare(name list, name other) {           \
+    static inline int name##Compare(name list, name other) {            \
         return name##RangeCompare(list, 0, list.len, other);            \
     }                                                                   \
     static inline bool name##StartsWith(name list, name other) {        \
@@ -52,7 +52,7 @@
     u name##LastPos(name list, type item);
 #define listDeclareDefaultName(type, name)                       \
     listDeclareCompareName(type, name);                          \
-    static inline bool type##Compare(type left, type right) {    \
+    static inline int type##Compare(type left, type right) {     \
         return (left > right) - (left < right);                  \
     }
 #define listDeclare(type) listDeclareName(type, type##List)

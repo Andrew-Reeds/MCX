@@ -44,6 +44,15 @@ typedef enum {
     set(type)* type##AggregateNew(listName list);                       \
     set(type)* type##AggregateFromArray(type* items, u count);          \
     set(type)* type##ComplementSetNew(set(type)* set);                  \
+    inline static set(type)* type##SetAdd(set(type)* left, set(type)* right) { \
+        return type##CombinedSetNew(left, right, SCSADD);               \
+    }                                                                   \
+    inline static set(type)* type##SetSubstract(set(type)* left, set(type)* right) { \
+        return type##CombinedSetNew(left, right, SCSSUB);               \
+    }                                                                   \
+    inline static set(type)* type##Cross(set(type)* left, set(type)* right) { \
+        return type##CombinedSetNew(left, right, SCSCRS);               \
+    }                                                                   \
     set(type)* type##CombinedSetNew(set(type)* left, set(type)* right, SETCOMBINATIONSTYLE style); \
     type##Set* type##RangeNew(type min, type max);                      \
     set(type)* type##SetAdd(set(type)* left, set(type)* right);         \
@@ -94,15 +103,6 @@ typedef enum {
     set(type)* type##AggregateFromArray(type* items, u count) {         \
         return type##AggregateNew(listName##FromArray(items, count));   \
     }                                                                   \
-    set(type)* type##SetAdd(set(type)* left, set(type)* right) {        \
-        return type##CombinedSetNew(left, right, SCSADD);               \
-    }                                                                   \
-    set(type)* type##SetSubstract(set(type)* left, set(type)* right) {  \
-        return type##CombinedSetNew(left, right, SCSSUB);               \
-    }                                                                   \
-    set(type)* type##Cross(set(type)* left, set(type)* right) {         \
-        return type##CombinedSetNew(left, right, SCSCRS);               \
-    }                                                                   \
     set(type)* type##SetComplement(set(type)* set) {                    \
         return type##ComplementSetNew(set);                             \
     }                                                                   \
@@ -110,8 +110,10 @@ typedef enum {
         return (*set->contains)(set, item);                             \
     }                                                                   \
     bool type##RangeContains(set(type)* set, type item) {               \
-        return (type##Compare(as(range(type), set)->min, item) < 0 || as(range(type), set)->inclMin && as(range(type), set)->min == item) && \
-            (type##Compare(as(range(type), set)->max, item) > 0 || as(range(type), set)->inclMax && as(range(type), set)->max == item); \
+        return (type##Compare(as(range(type), set)->min, item) < 0 ||   \
+                as(range(type), set)->inclMin && type##Compare(as(range(type), set)->min, item) == 0) && \
+            (type##Compare(as(range(type), set)->max, item) > 0 ||      \
+             as(range(type), set)->inclMax && as(range(type), set)->max == item); \
     }                                                                   \
     type##Set* type##RangeNew(type min, type max) {                     \
         set(type)* res = as(set(type), new(range(type)));               \
