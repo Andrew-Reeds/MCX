@@ -26,4 +26,6 @@ typedef double d;
 
 #define init(h) h##Init()//just to make it stand out
 
+void init(MCX);
+
 #endif //MCX_H

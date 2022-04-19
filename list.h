@@ -183,7 +183,7 @@
             res.cap <<= 1;                                  \
         res.items = (type*)malloc(res.cap * sizeof(type));  \
         for (u i = 0; i < count; i++)                       \
-            res.items[i] = va_arg(args, typ);               \
+            res.items[i] = va_arg(args, type);              \
         va_end(args);                                       \
         return res;                                         \
     }
