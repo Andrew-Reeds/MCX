@@ -21,7 +21,7 @@ static inline string readAllText(string path) {
     return res;
 }
 static inline string runProcess(string command) {
-    FILE* f = popen("objdump -d tmp.o", "r");
+    FILE* f = popen(cptr(command), "r");
     string res = readToEnd(f);
     pclose(f);
     return res;
