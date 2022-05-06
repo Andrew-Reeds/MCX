@@ -7,28 +7,44 @@ listDefineCompare(string);
 setDefineName(char, string);
 setDefineVaListIntName(char, string);
 
-list(string) split(string str, char c) {
+static list(string) splitB(string str, char c, bool keep) {
     list(string) res = {0};
-    u s = 0;
+    u j = 0;
     for (u i = 0; i < str.len; i++)
         if (str.items[i] == c) {
-            stringListAdd(&res, stringGetRange(str, s, i - s));
-            s = i + 1;
+            if (keep || i != j)
+                stringListAdd(&res, stringGetRange(str, j, i - j));
+            j = i + 1;
         }
-    stringListAdd(&res, stringGetRange(str, s, str.len - s));
+    if (keep || str.len != j)
+        stringListAdd(&res, stringGetRange(str, j, str.len - j));
     return res;
 }
-list(string) splitS(string str, string s) {
+list(string) split(string str, char c) {
+    return splitB(str, c, true);
+}
+list(string) splitR(string str, char c) {
+    return splitB(str, c, false);
+}
+static list(string) splitSB(string str, string s, bool keep) {
     list(string) res = {0};
     u j = 0;
     for (u i = 0; i < str.len; i++)
         if (stringRangeCompare(str, i, s.len, s)) {
-            stringListAdd(&res, stringGetRange(str, j, i - j));
+            if (keep || i != j)
+                stringListAdd(&res, stringGetRange(str, j, i - j));
             i += s.len;
             j = i + 1;
         }
-    stringListAdd(&res, stringGetRange(str, j, str.len - j));
+    if (keep || j != str.len)
+        stringListAdd(&res, stringGetRange(str, j, str.len - j));
     return res;
+}
+list(string) splitS(string str, string s) {
+    return splitSB(str, s, true);
+}
+list(string) splitSR(string str, string s) {
+    return splitSB(str, s, false);
 }
 
 char getEscChar(char c) {
