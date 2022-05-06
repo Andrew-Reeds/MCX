@@ -30,6 +30,9 @@ static inline string str(char* str) {
         return stringFromArray(str, strlen(str));
 }
 
+list(string) split(string str, char c);
+list(string) splitS(string str, string s);
+
 static inline string substring(string str, u index) {
     return stringGetRange(str, index, str.len - index);
 }
