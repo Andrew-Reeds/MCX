@@ -91,7 +91,7 @@
         if (other.len == 0)                                             \
             return;                                                     \
         if (list->cap == 0)                                             \
-            listReset(*list, type);               \
+            listReset(*list, type);                                     \
         list->len += other.len;                                         \
         if (list->len > list->cap) {                                    \
             while (list->len > list->cap)                               \
@@ -113,16 +113,16 @@
         return res;                                                     \
     }                                                                   \
     void name##Insert(name* list, type item, u index) {                 \
+        if (index > list->len)                                          \
+            index = list->len;                                          \
         if (list->cap == 0)                                             \
-            listReset(*list, type);               \
+            listReset(*list, type);                                     \
         list->len++;                                                    \
         if (list->len > list->cap) {                                    \
             list->cap <<= 1;                                            \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
-        memcpy((void*)((ptr)list->items + (index + 1) * sizeof(type)),  \
-               (void*)((ptr)list->items + index * sizeof(type)),        \
-               list->len - index - 1);                                  \
+        memcpy(&list->items[index + 1], &list->items[index], list->len - index); \
         list->items[index] = item;                                      \
     }                                                                   \
     void name##InsertRange(name* list, name other, u index) {           \
@@ -136,11 +136,8 @@
                 list->cap <<= 1;                                        \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
-        memcpy((void*)((ptr)list->items + (index + other.len) * sizeof(type)), \
-               (void*)((ptr)list->items + index * sizeof(type)),        \
-               list->len - index - other.len);                          \
-        memcpy((void*)((ptr)list->items + index * sizeof(type)),        \
-               other.items, other.len);                                 \
+        memcpy(&list->items[index + other.len], &list->items[index], list->len - index);                                      \
+        memcpy(&list->items[index], other.items, other.len);            \
     }                                                                   \
     void name##Remove(name* list, u index) {                            \
         memcpy((void*)((ptr)(list->items) + index * sizeof(type)),      \
