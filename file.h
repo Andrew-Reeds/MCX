@@ -33,6 +33,8 @@ static inline void writeAllText(string path, string text) {
     fclose(f);
 }
 
+list(string) listFiles(string directory, unsigned char kind);
+
 static inline string realPath(string path) {
     return str(realpath(cptr(path), NULL));
 }
