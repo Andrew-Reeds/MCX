@@ -23,8 +23,9 @@ static inline string readAllText(string path) {
 static inline string runProcess(string command) {
     FILE* f = popen(cptr(command), "r");
     string res = readToEnd(f);
-    pclose(f);
-    return res;
+    if (WEXITSTATUS(pclose(f)) == 0) return res;
+    string tmp = {0};
+    return tmp;
 }
 static inline void writeAllText(string path, string text) {
     FILE* f = fopen(cptr(path), "w");
