@@ -122,7 +122,7 @@
             list->cap <<= 1;                                            \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
-        memcpy(&list->items[index + 1], &list->items[index], list->len - index); \
+        memcpy(&list->items[index + 1], &list->items[index], (list->len - index) * sizeof(type)); \
         list->items[index] = item;                                      \
     }                                                                   \
     void name##InsertRange(name* list, name other, u index) {           \
@@ -136,7 +136,7 @@
                 list->cap <<= 1;                                        \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
-        memcpy(&list->items[index + other.len], &list->items[index], list->len - index);                                      \
+        memcpy(&list->items[index + other.len], &list->items[index], (list->len - index) * sizeof(type)); \
         memcpy(&list->items[index], other.items, other.len);            \
     }                                                                   \
     void name##Remove(name* list, u index) {                            \
