@@ -21,7 +21,7 @@ typedef double d;
 #define reset(obj, type) memset(obj, 0, sizeof(type))
 #define new(type) ((type*)reset(malloc(sizeof(type)), type))
 #define as(type, obj) ((type*)obj)
-#define max(type) ((1 << (sizeof(type) * 8)) - 1)
+#define max(type) (type)(-1)
 #define clone(obj, type, count) memcpy(malloc(sizeof(type) * count), obj, sizeof(type) * count)
 
 #define init(h) h##Init()//just to make it stand out
