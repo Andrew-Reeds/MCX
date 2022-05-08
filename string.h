@@ -12,6 +12,7 @@ setDeclareVaList(char);
 listDeclareCompare(string);
 
 static inline char* cptr(string str) {
+    if (str.cap == 0) return str.items;
     char* res = (char*)malloc((str.len + 1) * sizeof(char));
     memcpy(res, str.items, str.len);
     res[str.len] = 0;
@@ -19,7 +20,6 @@ static inline char* cptr(string str) {
 }
 static inline string sstr(char* str) {
     string res = { strlen(str), 0, str };
-    res.cap = res.len;
     return res;
 }
 static inline string str(char* str) {
