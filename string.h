@@ -36,6 +36,11 @@ list(string) splitR(string str, char c);
 list(string) splitS(string str, string s);
 list(string) splitSR(string str, string s);
 
+static inline string join(list(string) strs) {
+    string res = {0};
+    for (u i = 0; i < strs.len; i++) stringAddRange(&res, strs.items[i]);
+    return res;
+}
 static inline string substring(string str, u index) {
     return stringGetRange(str, index, str.len - index);
 }
