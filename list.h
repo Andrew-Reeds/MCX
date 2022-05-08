@@ -211,15 +211,13 @@
         return false;                                                   \
     }                                                                   \
     int name##RangeCompare(name list, u offset, u count, name other) {  \
-        if (count + offset > list.len)                                  \
-            count = list.len - offset;                                  \
         u i = 0;                                                        \
         for ( ; i < count && i < other.len && i + offset < list.len; i++) { \
             int c = type##Compare(list.items[i + offset], other.items[i]); \
             if (c != 0)                                                 \
                 return c;                                               \
         }                                                               \
-        return (count > other.len) - (count < other.len);               \
+        return (i == other.len && i < count) - (i + offset == list.len && i < count); \
     }                                                                   \
     void name##RemoveAll(name* list, type item) {                       \
         for (u i = list->len; i > 0; i--)                               \
