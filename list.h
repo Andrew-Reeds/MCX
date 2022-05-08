@@ -16,8 +16,10 @@
     }                                                           \
     name name##FromArray(type* items, u count);                 \
     static inline name name##Clone(name original) {             \
-        if (original.cap == 0)                                  \
-            return original;                                    \
+        if (original.cap == 0) {                                \
+            if (original.len == 0) return original;             \
+            else return name##FromArray(original.items, original.len); \
+        }                                                       \
         name res = { original.len, original.cap, (type*)malloc(original.cap * sizeof(type)) }; \
         memcpy(res.items, original.items, original.len);        \
         return res;                                             \
