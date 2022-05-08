@@ -2,6 +2,7 @@
 #define MCX_FILE_H
 #include <stdio.h>
 #include "string.h"
+#include <dirent.h>
 
 void init(FILE);
 
