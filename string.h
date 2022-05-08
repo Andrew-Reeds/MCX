@@ -47,6 +47,7 @@ static inline string joinC(list(string) strs, char c) {
         stringAddRange(&res, strs.items[i]);
         stringAdd(&res, c);
     }
+    return res;
 }
 static inline string substring(string str, u index) {
     return stringGetRange(str, index, str.len - index);
