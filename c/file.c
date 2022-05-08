@@ -25,7 +25,7 @@ list(string) listFiles(string directory, unsigned char kind) {
         while ((dir = readdir(d)) != NULL)
             if (dir->d_type & kind) {
                 string tmp = stringClone(directory);
-                stringAddRange(&tmp, sstr(dir->d_name));
+                stringAddRange(&tmp, str(dir->d_name));
                 stringListAdd(&res, tmp);
             }
     return res;
