@@ -10,8 +10,9 @@ static inline string readToEnd(FILE* f) {
     fseek(f, 0l, SEEK_END);
     long size = ftell(f) - pos;
     fseek(f, pos, SEEK_SET);
-    char* res = malloc(size);
+    char* res = malloc(size + 1);
     fread(res, 1, size, f);
+    res[size] = 0;
     return str(res);
 }
 static inline string readAllText(string path) {
@@ -42,12 +43,10 @@ typedef enum {
 } PATHPROP;
 list(string) listFiles(string directory, PATHPROP kind);
 
+string realPathR(string path, string relativeTo);
 static inline string realPath(string path) {
-    string cmd = str("realpath ");
-    string res = runProcess(*stringAddRange(&cmd, path));
-    if (res.len > 0 && res.items[res.len - 1] == '\n') stringRemove(&res, res.len - 1);
-    if (path.len > 0 && path.items[path.len - 1] == '/') stringAdd(&res, '/');
-    return res;
+    string tmp = {0};
+    return realPathR(path, tmp);
 }
 bool fileExists(string path);
 extern set(char)* illegalPath;

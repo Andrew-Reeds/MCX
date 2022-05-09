@@ -31,12 +31,12 @@ static inline string str(char* str) {
 }
 
 #define concat2(str, str1) concat(str, str1);
-#define concat3(str, str1, str2) concat(concat2(str, str1), str2);
-#define concat4(str, str1, str2, str3) concat(concat3(str, str1, str2), str3);
-#define concat5(str, str1, str2, str3, str4) concat(concat4(str, str1, str2, str3), str4);
-#define concat6(str, str1, str2, str3, str4, str5) concat(concat5(str, str1, str2, str3, str4), str5);
-#define concat7(str, str1, str2, str3, str4, str5, str6) concat(concat6(str, str1, str2, str3, str4, str5), str6);
-#define concat8(str, str1, str2, str3, str4, str5, str6, str7) concat(concat7(str, str1, str2, str3, str4, str5, str6), str7);
+#define concat3(str, str1, str2) concat2(concat(str, str1), str2);
+#define concat4(str, str1, str2, str3) concat3(concat(str, str1), str2, str3);
+#define concat5(str, str1, str2, str3, str4) concat4(concat(str, str1), str2, str3, str4);
+#define concat6(str, str1, str2, str3, str4, str5) concat5(concat(str, str1), str2, str3, str4, str5);
+#define concat7(str, str1, str2, str3, str4, str5, str6) concat6(concat(str, str1), str2, str3, str4, str5, str6);
+#define concat8(str, str1, str2, str3, str4, str5, str6, str7) concat7(concat(str, str1), str2, str3, str4, str5, str6, str7);
 
 list(string) split(string str, char c);
 list(string) splitR(string str, char c);

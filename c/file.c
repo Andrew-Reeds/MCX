@@ -5,6 +5,16 @@ void init(FILE) {
     illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
 }
 
+string realPathR(string path, string relativeTo) {
+    string cmd = str("realpath ");
+    concat(&cmd, path);
+    if (relativeTo.len != 0) concat3(&cmd, sstr(" --relative-to="), realPath(relativeTo));
+    string res = runProcess(cmd);
+    if (res.len > 0 && res.items[res.len - 1] == '\n') stringRemove(&res, res.len - 1);
+    if (path.len > 0 && path.items[path.len - 1] == '/') stringAdd(&res, '/');
+    return res;
+}
+
 set(char)* illegalPath = NULL;
 bool isPathLegal(string path) {
     bool res = true;
@@ -13,7 +23,7 @@ bool isPathLegal(string path) {
     return res;
 }
 bool fileExists(string path) {
-    return access(cptr(path), F_OK) == 0;
+    return access(cptr(realPath(path)), F_OK) == 0;
 }
 
 list(string) listFiles(string directory, PATHPROP kind) {
