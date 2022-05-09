@@ -24,14 +24,14 @@
         memcpy(res.items, original.items, original.len);        \
         return res;                                             \
     }                                                           \
-    void name##Add(name* list, type item);                      \
-    void name##AddRange(name* list, name other);                \
+    name* name##Add(name* list, type item);                      \
+    name* name##AddRange(name* list, name other);                \
     name name##With(name list, type item);                      \
     name name##WithRange(name list, name other);                \
-    void name##Insert(name* list, type item, u index);          \
-    void name##InsertRange(name* list, name other, u index);    \
-    void name##Remove(name* list, u index);                     \
-    void name##RemoveRange(name* list, u index, u count);       \
+    name* name##Insert(name* list, type item, u index);          \
+    name* name##InsertRange(name* list, name other, u index);    \
+    name* name##Remove(name* list, u index);                     \
+    name* name##RemoveRange(name* list, u index, u count);       \
     name name##GetRange(name list, u index, u count);
 #define listDeclareVaListName(type, name)       \
     name name##FromVaList(u count, ...);
@@ -51,8 +51,8 @@
     static inline bool name##EndsWith(name list, name other) {          \
         return other.len <= list.len && name##RangeCompare(list, list.len - other.len, other.len, other) == 0; \
     }                                                                   \
-    void name##RemoveAll(name* list, type item);                        \
-    void name##ReplaceAll(name* list, name original, name replacement); \
+    name* name##RemoveAll(name* list, type item);                        \
+    name* name##ReplaceAll(name* list, name original, name replacement); \
     u name##Pos(name list, type item);                                  \
     u name##LastPos(name list, type item);
 #define listDeclareDefaultName(type, name)                       \
@@ -77,19 +77,20 @@
         memcpy(res.items, items, res.len);                              \
         return res;                                                     \
     }                                                                   \
-    void name##Add(name* list, type item) {                             \
+    name* name##Add(name* list, type item) {                            \
         if (list->cap == 0)                                             \
-            listReset(*list, type);               \
+            listReset(*list, type);                                     \
         list->len++;                                                    \
         if (list->len > list->cap) {                                    \
             list->cap <<= 1;                                            \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
         list->items[list->len - 1] = item;                              \
+        return list;                                                    \
     }                                                                   \
-    void name##AddRange(name* list, name other) {                       \
+    name* name##AddRange(name* list, name other) {                      \
         if (other.len == 0)                                             \
-            return;                                                     \
+            return list;                                                \
         if (list->cap == 0)                                             \
             listReset(*list, type);                                     \
         list->len += other.len;                                         \
@@ -101,6 +102,7 @@
         memcpy((void*)((ptr)list->items + (list->len - other.len) * sizeof(type)), \
                (void*)other.items,                                      \
                other.len * sizeof(type));                               \
+        return list;                                                    \
     }                                                                   \
     name name##With(name list, type item) {                             \
         name res = { list.len, list.cap, clone(list.items, type, list.cap) }; \
@@ -112,7 +114,7 @@
         name##AddRange(&res, other);                                    \
         return res;                                                     \
     }                                                                   \
-    void name##Insert(name* list, type item, u index) {                 \
+    name* name##Insert(name* list, type item, u index) {                \
         if (index > list->len)                                          \
             index = list->len;                                          \
         if (list->cap == 0)                                             \
@@ -124,10 +126,11 @@
         }                                                               \
         memcpy(&list->items[index + 1], &list->items[index], (list->len - index) * sizeof(type)); \
         list->items[index] = item;                                      \
+        return list;                                                    \
     }                                                                   \
-    void name##InsertRange(name* list, name other, u index) {           \
+    name* name##InsertRange(name* list, name other, u index) {          \
         if (other.len == 0)                                             \
-            return;                                                     \
+            return list;                                                \
         if (list->cap == 0)                                             \
             listReset(*list, type);                                     \
         list->len += other.len;                                         \
@@ -138,8 +141,9 @@
         }                                                               \
         memcpy(&list->items[index + other.len], &list->items[index], (list->len - index) * sizeof(type)); \
         memcpy(&list->items[index], other.items, other.len);            \
+        return list;                                                    \
     }                                                                   \
-    void name##Remove(name* list, u index) {                            \
+    name* name##Remove(name* list, u index) {                           \
         memcpy((void*)((ptr)(list->items) + index * sizeof(type)),      \
                (void*)((ptr)(list->items) + (index + 1) * sizeof(type)), \
                list->len - index - 1);                                  \
@@ -149,8 +153,9 @@
                 list->cap >>=1;                                         \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
+        return list;                                                    \
     }                                                                   \
-    void name##RemoveRange(name* list, u index, u count) {              \
+    name* name##RemoveRange(name* list, u index, u count) {             \
         memcpy((void*)((ptr)(list->items) + index * sizeof(type)),      \
                (void*)((ptr)(list->items) + (index + count) * sizeof(type)), \
                list->len - index - count);                              \
@@ -160,6 +165,7 @@
                 list->cap >>=1;                                         \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
+        return list;                                                    \
     }                                                                   \
     name name##GetRange(name list, u index, u count) {                  \
         if (count == 0) {                                               \
@@ -216,14 +222,15 @@
         }                                                               \
         return (i == other.len && i < count) - (i + offset == list.len && i < count); \
     }                                                                   \
-    void name##RemoveAll(name* list, type item) {                       \
+    name* name##RemoveAll(name* list, type item) {                       \
         for (u i = list->len; i > 0; i--)                               \
             if (type##Compare(list->items[i - 1], item) == 0)           \
                 name##Remove(list, i - 1);                              \
+        return list;                                                    \
     }                                                                   \
-    void name##ReplaceAll(name* list, name original, name replacement) { \
+    name* name##ReplaceAll(name* list, name original, name replacement) { \
         if (original.len == 0 || list->len < original.len)              \
-            return;                                                     \
+            return list;                                                \
         uList indexes = {0};                                            \
         for (u i = 0; i <= list->len - original.len; i++)               \
             if (name##RangeCompare(*list, i, original.len, original) == 0) { \
@@ -234,6 +241,7 @@
             name##RemoveRange(list, indexes.items[indexes.len - 1 - i], original.len); \
             name##InsertRange(list, replacement, indexes.items[indexes.len - 1 - i]); \
         }                                                               \
+        return list;                                                    \
     }                                                                   \
     u name##Pos(name list, type item) {                                 \
         u i = 0;                                                        \

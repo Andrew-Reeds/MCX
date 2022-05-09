@@ -2,7 +2,6 @@
 #define MCX_FILE_H
 #include "string.h"
 #include "mcx.h"
-#include <dirent.h>
 
 void init(FILE);
 
@@ -45,8 +44,7 @@ list(string) listFiles(string directory, PATHPROP kind);
 
 static inline string realPath(string path) {
     string cmd = str("realpath ");
-    stringAddRange(&cmd, path);
-    string res = runProcess(cmd);
+    string res = runProcess(*stringAddRange(&cmd, path));
     if (res.len > 0 && res.items[res.len - 1] == '\n') stringRemove(&res, res.len - 1);
     if (path.len > 0 && path.items[path.len - 1] == '/') stringAdd(&res, '/');
     return res;

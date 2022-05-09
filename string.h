@@ -30,6 +30,13 @@ static inline string str(char* str) {
         return stringFromArray(str, strlen(str));
 }
 
+#define concat2(str, str1) concat(str, str1);
+#define concat3(str, str1, str2) concat(concat2(str, str1), str2);
+#define concat4(str, str1, str2, str3) concat(concat3(str, str1, str2), str3);
+#define concat5(str, str1, str2, str3, str4) concat(concat4(str, str1, str2, str3), str4);
+#define concat6(str, str1, str2, str3, str4, str5) concat(concat5(str, str1, str2, str3, str4), str5);
+#define concat7(str, str1, str2, str3, str4, str5, str6) concat(concat6(str, str1, str2, str3, str4, str5), str6);
+#define concat8(str, str1, str2, str3, str4, str5, str6, str7) concat(concat7(str, str1, str2, str3, str4, str5, str6), str7);
 
 list(string) split(string str, char c);
 list(string) splitR(string str, char c);
@@ -52,10 +59,10 @@ static inline string joinC(list(string) strs, char c) {
 static inline string substring(string str, u index) {
     return stringGetRange(str, index, str.len - index);
 }
-static inline void concat(string* str, string other) {
+static inline string* concat(string* str, string other) {
     return stringAddRange(str, other);
 }
-static inline void catCptr(string* str, char* other) {
+static inline string* catCptr(string* str, char* other) {
     return concat(str, sstr(other));
 }
 
