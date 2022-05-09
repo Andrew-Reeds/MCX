@@ -1,7 +1,7 @@
 #ifndef MCX_FILE_H
 #define MCX_FILE_H
-#include <stdio.h>
 #include "string.h"
+#include "mcx.h"
 #include <dirent.h>
 
 void init(FILE);
@@ -23,10 +23,12 @@ static inline string readAllText(string path) {
 }
 static inline string runProcess(string command) {
     FILE* f = popen(cptr(command), "r");
-    string res = readToEnd(f);
+    char buf[1024];
+    string res = {0};
+    while (fgets(buf, sizeof(buf), f) != NULL) stringAddRange(&res, sstr(buf));
     if (WEXITSTATUS(pclose(f)) == 0) return res;
-    string tmp = {0};
-    return tmp;
+    reset(&res, string);
+    return res;
 }
 static inline void writeAllText(string path, string text) {
     FILE* f = fopen(cptr(path), "w");
@@ -34,10 +36,20 @@ static inline void writeAllText(string path, string text) {
     fclose(f);
 }
 
-list(string) listFiles(string directory, unsigned char kind);
+typedef enum {
+   P_DIR  = 1,
+   P_REG  = 2,
+   P_FULL = 4,
+} PATHPROP;
+list(string) listFiles(string directory, PATHPROP kind);
 
 static inline string realPath(string path) {
-    return str(realpath(cptr(path), NULL));
+    string cmd = str("realpath ");
+    stringAddRange(&cmd, path);
+    string res = runProcess(cmd);
+    if (res.len > 0 && res.items[res.len - 1] == '\n') stringRemove(&res, res.len - 1);
+    if (path.len > 0 && path.items[path.len - 1] == '/') stringAdd(&res, '/');
+    return res;
 }
 bool fileExists(string path);
 extern set(char)* illegalPath;

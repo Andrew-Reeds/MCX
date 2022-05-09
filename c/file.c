@@ -16,17 +16,13 @@ bool fileExists(string path) {
     return access(cptr(path), F_OK) == 0;
 }
 
-list(string) listFiles(string directory, unsigned char kind) {
-    DIR* d;
-    struct dirent* dir;
-    list(string) res = {0};
-    d = opendir(cptr(directory));
-    if (d)
-        while ((dir = readdir(d)) != NULL)
-            if (dir->d_type & kind) {
-                string tmp = stringClone(directory);
-                stringAddRange(&tmp, str(dir->d_name));
-                stringListAdd(&res, tmp);
-            }
+list(string) listFiles(string directory, PATHPROP kind) {
+    if (directory.len == 0 || directory.items[directory.len - 1] != '/') directory = stringWith(directory, '/');
+    string cmd = str("ls -p1 --color=no ");
+    stringAddRange(&cmd, directory);
+    if ((kind | P_DIR) != kind) stringAddRange(&cmd, sstr(" | grep -v / --color=never"));
+    else if ((kind | P_REG) != kind) stringAddRange(&cmd, sstr(" | grep -s / --color=never"));
+    list(string) res = splitR(runProcess(cmd), '\n');
+    if (kind & P_FULL) for (u i = 0; i < res.len; i++) stringInsertRange(&res.items[i], directory, 0);
     return res;
 }
