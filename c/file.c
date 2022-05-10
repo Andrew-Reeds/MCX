@@ -5,14 +5,21 @@ void init(FILE) {
     illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
 }
 
-string realPathR(string path, string relativeTo) {
+string realPath(string path) {
+    string res = {0};
+    if (path.len == 0) return res;
     string cmd = str("realpath ");
-    concat(&cmd, path);
-    if (relativeTo.len != 0) concat3(&cmd, str(" --relative-to="), realPath(relativeTo));
-    string res = runProcess(cmd);
-    if (res.len > 0 && res.items[res.len - 1] == '\n') stringRemove(&res, res.len - 1);
-    if (path.len > 0 && path.items[path.len - 1] == '/') stringAdd(&res, '/');
+    res = runProcess(*concat(&cmd, path));
+    if (path.items[path.len - 1] == '/') res.items[res.len - 1] = '/';
+    else stringRemove(&res, res.len - 1);
     return res;
+}
+string realPathR(string path, string relativeTo) {
+    string here = realPath(str("."));
+    chdir(cptr(relativeTo));
+    string res = realPath(path);
+    chdir(cptr(here));
+    return  res;
 }
 
 set(char)* illegalPath = NULL;

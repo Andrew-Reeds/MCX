@@ -5,6 +5,13 @@
 
 void init(FILE);
 
+string realPath(string path);
+string realPathR(string path, string relativeTo);
+
+bool fileExists(string path);
+extern set(char)* illegalPath;
+bool isPathLegal(string path);
+
 static inline string readToEnd(FILE* f) {
     long pos = ftell(f);
     fseek(f, 0l, SEEK_END);
@@ -15,7 +22,6 @@ static inline string readToEnd(FILE* f) {
     res[size] = 0;
     return str(res);
 }
-static inline string realPath(string path);
 static inline string readAllText(string path) {
     FILE* f = fopen(cptr(realPath(path)), "r");
     string res = readToEnd(f);
@@ -43,14 +49,5 @@ typedef enum {
    P_FULL = 4,
 } PATHPROP;
 list(string) listFiles(string directory, PATHPROP kind);
-
-string realPathR(string path, string relativeTo);
-static inline string realPath(string path) {
-    string tmp = {0};
-    return realPathR(path, tmp);
-}
-bool fileExists(string path);
-extern set(char)* illegalPath;
-bool isPathLegal(string path);
 
 #endif // MCX_FILE_H
