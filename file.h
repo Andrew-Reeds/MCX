@@ -15,8 +15,9 @@ static inline string readToEnd(FILE* f) {
     res[size] = 0;
     return str(res);
 }
+static inline string realPath(string path);
 static inline string readAllText(string path) {
-    FILE* f = fopen(cptr(path), "r");
+    FILE* f = fopen(cptr(realPath(path)), "r");
     string res = readToEnd(f);
     fclose(f);
     return res;

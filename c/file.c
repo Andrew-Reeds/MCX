@@ -33,6 +33,6 @@ list(string) listFiles(string directory, PATHPROP kind) {
     if ((kind | P_DIR) != kind) stringAddRange(&cmd, sstr(" | grep -v / --color=never"));
     else if ((kind | P_REG) != kind) stringAddRange(&cmd, sstr(" | grep -s / --color=never"));
     list(string) res = splitR(runProcess(cmd), '\n');
-    if (kind & P_FULL) for (u i = 0; i < res.len; i++) stringInsertRange(&res.items[i], directory, 0);
+    if (kind & P_FULL) for (u i = 0; i < res.len; i++) res.items[i] = stringWithRange(directory, res.items[i]);
     return res;
 }

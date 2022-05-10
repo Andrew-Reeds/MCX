@@ -24,14 +24,14 @@
         memcpy(res.items, original.items, original.len);        \
         return res;                                             \
     }                                                           \
-    name* name##Add(name* list, type item);                      \
-    name* name##AddRange(name* list, name other);                \
+    name* name##Add(name* list, type item);                     \
+    name* name##AddRange(name* list, name other);               \
     name name##With(name list, type item);                      \
     name name##WithRange(name list, name other);                \
-    name* name##Insert(name* list, type item, u index);          \
-    name* name##InsertRange(name* list, name other, u index);    \
-    name* name##Remove(name* list, u index);                     \
-    name* name##RemoveRange(name* list, u index, u count);       \
+    name* name##Insert(name* list, type item, u index);         \
+    name* name##InsertRange(name* list, name other, u index);   \
+    name* name##Remove(name* list, u index);                    \
+    name* name##RemoveRange(name* list, u index, u count);      \
     name name##GetRange(name list, u index, u count);
 #define listDeclareVaListName(type, name)       \
     name name##FromVaList(u count, ...);
@@ -140,13 +140,13 @@
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
         memcpy(&list->items[index + other.len], &list->items[index], (list->len - index) * sizeof(type)); \
-        memcpy(&list->items[index], other.items, other.len);            \
+        memcpy(&list->items[index], other.items, other.len * sizeof(type)); \
         return list;                                                    \
     }                                                                   \
     name* name##Remove(name* list, u index) {                           \
-        memcpy((void*)((ptr)(list->items) + index * sizeof(type)),      \
-               (void*)((ptr)(list->items) + (index + 1) * sizeof(type)), \
-               list->len - index - 1);                                  \
+        if (index >= list->len) index = list->len - 1;                  \
+        memcpy(&list->items[index], &list->items[index + 1],            \
+               (list->len - index - 1) * sizeof(type));                 \
         list->len--;                                                    \
         if (list->len < list->cap >> 1 && list->cap > 16) {             \
             while (list->len < list->cap >> 1 && list->cap > 16)        \
@@ -156,9 +156,8 @@
         return list;                                                    \
     }                                                                   \
     name* name##RemoveRange(name* list, u index, u count) {             \
-        memcpy((void*)((ptr)(list->items) + index * sizeof(type)),      \
-               (void*)((ptr)(list->items) + (index + count) * sizeof(type)), \
-               list->len - index - count);                              \
+        memcpy(&list->items[index], &list->items[index + count],        \
+               (list->len - index - count) * sizeof(type));             \
         list->len -= count;                                             \
         if (list->len < list->cap >> 1 && list->cap > 16) {             \
             while (list->len < list->cap >> 1 && list->cap > 16)        \
