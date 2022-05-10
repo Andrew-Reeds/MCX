@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include "mcx.h"
+#include "assert.h"
 
 #define list(type) type##List
 #define listDeclareName(type, name)                             \
@@ -11,19 +12,8 @@
         u cap;                                                  \
         type* items;                                            \
     } name;                                                     \
-    static inline name* name##New() {                           \
-        return new(name);                                       \
-    }                                                           \
     name name##FromArray(type* items, u count);                 \
-    static inline name name##Clone(name original) {             \
-        if (original.cap == 0) {                                \
-            if (original.len == 0) return original;             \
-            else return name##FromArray(original.items, original.len); \
-        }                                                       \
-        name res = { original.len, original.cap, (type*)malloc(original.cap * sizeof(type)) }; \
-        memcpy(res.items, original.items, original.len);        \
-        return res;                                             \
-    }                                                           \
+    name name##Clone(name original);                            \
     name* name##Add(name* list, type item);                     \
     name* name##AddRange(name* list, name other);               \
     name name##With(name list, type item);                      \
@@ -68,18 +58,24 @@
 #define listDefineName(type, name)                                      \
     name name##FromArray(type* items, u count) {                        \
         name res = { count, 0, NULL };                                  \
-        if (res.len == 0)                                               \
-            return res;                                                 \
+        if (res.len == 0) return res;                                   \
         res.cap = 16;                                                   \
-        while (res.len > res.cap)                                       \
-            res.cap <<= 1;                                              \
+        while (res.len > res.cap) res.cap <<= 1;                        \
         res.items = (type*)malloc(res.cap * sizeof(type));              \
         memcpy(res.items, items, res.len);                              \
         return res;                                                     \
     }                                                                   \
+    name name##Clone(name original) {                                   \
+        if (original.cap == 0) {                                        \
+            if (original.len == 0) return original;                     \
+            else return name##FromArray(original.items, original.len);  \
+        }                                                               \
+        name res = { original.len, original.cap, (type*)malloc(original.cap * sizeof(type)) }; \
+        memcpy(res.items, original.items, original.len);                \
+        return res;                                                     \
+    }                                                                   \
     name* name##Add(name* list, type item) {                            \
-        if (list->cap == 0)                                             \
-            listReset(*list, type);                                     \
+        listPrepare(*list, type, name);                                 \
         list->len++;                                                    \
         if (list->len > list->cap) {                                    \
             list->cap <<= 1;                                            \
@@ -89,19 +85,15 @@
         return list;                                                    \
     }                                                                   \
     name* name##AddRange(name* list, name other) {                      \
-        if (other.len == 0)                                             \
-            return list;                                                \
-        if (list->cap == 0)                                             \
-            listReset(*list, type);                                     \
+        if (other.len == 0) return list;                                \
+        listPrepare(*list, type, name);                                 \
         list->len += other.len;                                         \
         if (list->len > list->cap) {                                    \
             while (list->len > list->cap)                               \
                 list->cap <<= 1;                                        \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
-        memcpy((void*)((ptr)list->items + (list->len - other.len) * sizeof(type)), \
-               (void*)other.items,                                      \
-               other.len * sizeof(type));                               \
+        memcpy(&list->items[list->len - other.len], other.items, other.len * sizeof(type)); \
         return list;                                                    \
     }                                                                   \
     name name##With(name list, type item) {                             \
@@ -115,10 +107,8 @@
         return res;                                                     \
     }                                                                   \
     name* name##Insert(name* list, type item, u index) {                \
-        if (index > list->len)                                          \
-            index = list->len;                                          \
-        if (list->cap == 0)                                             \
-            listReset(*list, type);                                     \
+        assert(index <= list->len, "Index '%zu' must be less than or equal to the list's length '%zu'", index, list->len); \
+        listPrepare(*list, type, name);                                 \
         list->len++;                                                    \
         if (list->len > list->cap) {                                    \
             list->cap <<= 1;                                            \
@@ -129,10 +119,9 @@
         return list;                                                    \
     }                                                                   \
     name* name##InsertRange(name* list, name other, u index) {          \
-        if (other.len == 0)                                             \
-            return list;                                                \
-        if (list->cap == 0)                                             \
-            listReset(*list, type);                                     \
+        assert(index <= list->len, "Index '%zu' must be less than or equal to the list's length '%zu'", index, list->len); \
+        if (other.len == 0) return list;                                \
+        listPrepare(*list, type, name);                                 \
         list->len += other.len;                                         \
         if (list->len > list->cap) {                                    \
             while (list->len > list->cap)                               \
@@ -144,7 +133,7 @@
         return list;                                                    \
     }                                                                   \
     name* name##Remove(name* list, u index) {                           \
-        if (index >= list->len) index = list->len - 1;                  \
+        assert(index < list->len, "Index '%zu' must be less than the list's length '%zu'", index, list->len); \
         memcpy(&list->items[index], &list->items[index + 1],            \
                (list->len - index - 1) * sizeof(type));                 \
         list->len--;                                                    \
@@ -156,6 +145,8 @@
         return list;                                                    \
     }                                                                   \
     name* name##RemoveRange(name* list, u index, u count) {             \
+        assert(index + count <= list->len, "Index plus count '%zu' must be less than or equal to the list's length '%zu'", index + count, list->len); \
+        if (count == 0) return list;                                    \
         memcpy(&list->items[index], &list->items[index + count],        \
                (list->len - index - count) * sizeof(type));             \
         list->len -= count;                                             \
@@ -167,8 +158,9 @@
         return list;                                                    \
     }                                                                   \
     name name##GetRange(name list, u index, u count) {                  \
+        assert(index + count <= list.len, "Index plus count '%zu' must be less than or equal to the list's length '%zu'", index + count, list.len); \
         if (count == 0) {                                               \
-            name res = { 0 };                                           \
+            name res = {0};                                             \
             return res;                                                 \
         }                                                               \
         name res = { count, 16, NULL };                                 \
@@ -221,15 +213,14 @@
         }                                                               \
         return (i == other.len && i < count) - (i + offset == list.len && i < count); \
     }                                                                   \
-    name* name##RemoveAll(name* list, type item) {                       \
+    name* name##RemoveAll(name* list, type item) {                      \
         for (u i = list->len; i > 0; i--)                               \
             if (type##Compare(list->items[i - 1], item) == 0)           \
                 name##Remove(list, i - 1);                              \
         return list;                                                    \
     }                                                                   \
     name* name##ReplaceAll(name* list, name original, name replacement) { \
-        if (original.len == 0 || list->len < original.len)              \
-            return list;                                                \
+        if (original.len == 0 || list->len < original.len) return list; \
         uList indexes = {0};                                            \
         for (u i = 0; i <= list->len - original.len; i++)               \
             if (name##RangeCompare(*list, i, original.len, original) == 0) { \
@@ -250,8 +241,7 @@
     u name##LastPos(name list, type item) {                             \
         u i = list.len;                                                 \
         for (; i > 0 && type##Compare(list.items[i - 1], item) != 0; i--); \
-        if (i == 0)                                                     \
-            return list.len;                                            \
+        if (i == 0) return list.len;                                    \
         return i - 1;                                                   \
     }
 #define listDefineDefaultName(type, name) listDefineCompareName(type, name)
@@ -260,10 +250,13 @@
 #define listDefineVaListInt(type) listDefineVaListIntName(type, type##List)
 #define listDefineCompare(type) listDefineCompareName(type, type##List)
 #define listDefineDefault(type) listDefineDefaultName(type, type##List)
-#define listReset(list, type) {                   \
-        (list).len = 0;                           \
-        (list).cap = 16;                          \
-        (list).items = malloc(16 * sizeof(type)); \
+#define listPrepare(list, type, name) {                   \
+        if ((list).cap == 0) {                            \
+            if ((list).len == 0) {                        \
+                (list).cap = 16;                          \
+                (list).items = malloc(sizeof(type) * 16); \
+            } else list = name##FromArray((list).items, (list).len); \
+        }                                                 \
     }
 
 listDeclareDefault(u);

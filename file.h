@@ -26,7 +26,7 @@ static inline string runProcess(string command) {
     FILE* f = popen(cptr(command), "r");
     char buf[1024];
     string res = {0};
-    while (fgets(buf, sizeof(buf), f) != NULL) stringAddRange(&res, sstr(buf));
+    while (fgets(buf, sizeof(buf), f) != NULL) stringAddRange(&res, str(buf));
     if (WEXITSTATUS(pclose(f)) == 0) return res;
     reset(&res, string);
     return res;

@@ -13,21 +13,18 @@ listDeclareCompare(string);
 
 static inline char* cptr(string str) {
     if (str.cap == 0) return str.items;
+    if (str.len < str.cap) {
+        str.items[str.len] = 0;
+        return str.items;
+    }
     char* res = (char*)malloc((str.len + 1) * sizeof(char));
     memcpy(res, str.items, str.len);
     res[str.len] = 0;
     return res;
 }
-static inline string sstr(char* str) {
+static inline string str(char* str) {
     string res = { strlen(str), 0, str };
     return res;
-}
-static inline string str(char* str) {
-    if (str == NULL) {
-        string res = {0};
-        return res;
-    } else
-        return stringFromArray(str, strlen(str));
 }
 
 #define concat2(str, str1) concat(str, str1);
@@ -61,9 +58,6 @@ static inline string substring(string str, u index) {
 }
 static inline string* concat(string* str, string other) {
     return stringAddRange(str, other);
-}
-static inline string* catCptr(string* str, char* other) {
-    return concat(str, sstr(other));
 }
 
 static inline string utos(u64 u) {
