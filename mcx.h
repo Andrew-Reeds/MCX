@@ -24,8 +24,4 @@ typedef double d;
 #define max(type) (type)(-1)
 #define clone(obj, type, count) memcpy(malloc(sizeof(type) * count), obj, sizeof(type) * count)
 
-#define init(h) h##Init()//just to make it stand out
-
-void init(MCX);
-
 #endif //MCX_H

@@ -3,13 +3,10 @@
 #include "string.h"
 #include "mcx.h"
 
-void init(FILE);
-
 string realPath(string path);
 string realPathR(string path, string relativeTo);
 
 bool fileExists(string path);
-extern set(char)* illegalPath;
 bool isPathLegal(string path);
 
 static inline string readToEnd(FILE* f) {

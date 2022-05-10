@@ -1,10 +1,6 @@
 #include "../file.h"
 #include <unistd.h>
 
-void init(FILE) {
-    illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
-}
-
 string realPath(string path) {
     string res = {0};
     if (path.len == 0) return res;
@@ -22,8 +18,9 @@ string realPathR(string path, string relativeTo) {
     return  res;
 }
 
-set(char)* illegalPath = NULL;
 bool isPathLegal(string path) {
+    static set(char)* illegalPath = NULL;
+    if (!illegalPath) illegalPath = charSetAdd(charAggregateFromArray("<>:\"/\\|?*", 9), charRangeNew(0, 31));
     bool res = true;
     for (u i = 0; i < path.len && res; i++)
         res = !charSetContains(illegalPath, path.items[i]);
