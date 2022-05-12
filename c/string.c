@@ -28,12 +28,16 @@ list(string) splitR(string str, char c) {
 }
 static list(string) splitSB(string str, string s, bool keep) {
     list(string) res = {0};
+    if (s.len == 0) {
+        stringListAdd(&res, str);
+        return res;
+    }
     u j = 0;
     for (u i = 0; i < str.len; i++)
         if (stringRangeCompare(str, i, s.len, s)) {
             if (keep || i != j)
                 stringListAdd(&res, stringGetRange(str, j, i - j));
-            i += s.len;
+            i += s.len - 1;
             j = i + 1;
         }
     if (keep || j != str.len)
@@ -45,6 +49,35 @@ list(string) splitS(string str, string s) {
 }
 list(string) splitSR(string str, string s) {
     return splitSB(str, s, false);
+}
+static list(string) splitCSB(string str, set(char)* cs, bool keep) {
+    list(string) res = {0};
+    u j = 0;
+    for (u i = 0; i < str.len; i++)
+        if (charSetContains(cs, str.items[i])) {
+            if (keep || i != j)
+                stringListAdd(&res, stringGetRange(str, j, j - i));
+            j = i + 1;
+        }
+    if (keep || str.len != j)
+        stringListAdd(&res, stringGetRange(str, j, str.len - j));
+    return res;
+}
+
+string* strTrim(string* str) {
+    static set(char)* whitespace = NULL;
+    if (!whitespace) whitespace = charAggregateFromArray(" \n\t", 3);
+    return strTrimCS(str, whitespace);
+}
+string* strTrimC(string* str, char c) {
+    u i = 0; for (; i < str->len && str->items[i] == c; i++);
+    stringRemoveRange(str, 0, i);
+    return str;
+}
+string* strTrimCS(string* str, set(char)* cs) {
+    u i = 0; for (; i < str->len && charSetContains(cs, str->items[i]); i++);
+    stringRemoveRange(str, 0, i);
+    return str;
 }
 
 char getEscChar(char c) {

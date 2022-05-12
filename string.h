@@ -39,6 +39,8 @@ list(string) split(string str, char c);
 list(string) splitR(string str, char c);
 list(string) splitS(string str, string s);
 list(string) splitSR(string str, string s);
+list(string) splitCS(string str, set(char)* cs);
+list(string) splitCSR(string str, set(char)* cs);
 
 static inline string join(list(string) strs) {
     string res = {0};
@@ -59,6 +61,10 @@ static inline string substring(string str, u index) {
 static inline string* concat(string* str, string other) {
     return stringAddRange(str, other);
 }
+
+string* strTrim(string* str);
+string* strTrimC(string* str, char c);
+string* strTrimCS(string* str, set(char)* cs);
 
 static inline string utos(u64 u) {
     string res = { 0, 64, (char*)malloc(64) };

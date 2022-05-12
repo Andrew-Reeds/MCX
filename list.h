@@ -71,7 +71,7 @@
             else return name##FromArray(original.items, original.len);  \
         }                                                               \
         name res = { original.len, original.cap, (type*)malloc(original.cap * sizeof(type)) }; \
-        memcpy(res.items, original.items, original.len);                \
+        memcpy(res.items, original.items, original.len * sizeof(type)); \
         return res;                                                     \
     }                                                                   \
     name* name##Add(name* list, type item) {                            \
@@ -118,14 +118,13 @@
         list->items[index] = item;                                      \
         return list;                                                    \
     }                                                                   \
-    name* name##InsertRange(name* list, name other, u index) {          \
+    name* name##InsertRange(name* list, name other, u index) { /*FIXME: InsertRange causes errors later on*/ \
         assert(index <= list->len, "Index '%zu' must be less than or equal to the list's length '%zu'", index, list->len); \
         if (other.len == 0) return list;                                \
         listPrepare(*list, type, name);                                 \
         list->len += other.len;                                         \
         if (list->len > list->cap) {                                    \
-            while (list->len > list->cap)                               \
-                list->cap <<= 1;                                        \
+            while (list->len > list->cap) list->cap <<= 1;              \
             list->items = (type*)realloc(list->items, list->cap * sizeof(type)); \
         }                                                               \
         memcpy(&list->items[index + other.len], &list->items[index], (list->len - index) * sizeof(type)); \
